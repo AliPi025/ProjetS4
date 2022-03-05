@@ -105,10 +105,27 @@ void cmd_dump_inode(int fd){
     }
 }
 
-/* main de test */
+/* main de test à compiler avec timestamp.c */
 int main(void){
-    int fd;
-    fd = open("./rep/d0", O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRWXG|S_IRWXO);
+    int fd, cr;
+    pid_t pid;
+    switch (pid = fork())
+    {
+    case -1:
+        fprintf(stderr, "echec fork\n");
+        exit(1);
+        break;
+    case 0:
+        execl("cmd_format", "./cmd_format", "DiskDir", "500000", NULL); // <------------------ il faut que le répertoire DiskDir existe déjà et que cmd_format ait été compilé !
+        fprintf(stderr, "echec disk\n");
+        exit(2);
+        break;
+        
+    default:
+        wait(&cr);
+        break;
+    }
+    fd = open("./DiskDir/d0", O_RDWR, S_IRWXU|S_IRWXG|S_IRWXO);
     // Initialise le super block, la table d'inodes et la session
     super_block_t sup_b = {0, 1, 0, sizeof(super_block_t)};
     inode_table_t tab_i;
@@ -131,13 +148,14 @@ int main(void){
 
 // Affichage attendu:
 /*
+DiskDir/d0
 Inode 0: 
     - Nom: test
     - Taille: 25
     - User ID: 0
     - User Rights: 3
     - Others Rights: 0
-    - Date Création: Sat Mar  5 17:24:04 2022
+    - Date Création: Sat Mar  5 17:24:04 2022 <-------------- Bon évidemment la date change
     - Date Modification: Sat Mar  5 17:24:04 2022
     - Nombre Blocks: 7
     - Premier Octet: 46
