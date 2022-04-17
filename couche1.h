@@ -13,13 +13,12 @@
 
 
 #include "sos_defines.h"
-#include "headers.h"
 #include "include.h"
+#include "timestamp.h"
 
 
 /* Initialise la variable 'virtual_disk_sos' à partir du nom du répertoire */
-void init_disk_sos(char* nom_repertoire) ;
-
+void init_disk_sos(char* nom_repertoire,virtual_disk_t virtual_disk_sos);
 
 /* Fonction qui veille a ce que le système soit éteint proprement : Sauvgarde du catalogue */
 void eteindreSys(FILE* vdisk);
@@ -28,5 +27,10 @@ void eteindreSys(FILE* vdisk);
 unsigned int compute_nblock(unsigned int n_octets);
 
 /* Écrit un bloc block à la position pos sur le disque du système */
-void write_block(long pos);
+void write_block(long pos,virtual_disk_t virtual_disk_sos);
+
+/* Lit un bloc block à la position pos sur le disque du système */
+void read_block(long pos,virtual_disk_t virtual_disk_sos);
+
+#endif
 
