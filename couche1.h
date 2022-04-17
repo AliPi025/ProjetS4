@@ -1,3 +1,13 @@
+/********************************************************************
+ *    Couche 1 : les blocs                                          *
+ *    Gestion de l'écriture d'un bloc sur le disque                 *
+ *    Projet S4                                                     *
+ *                                                                  *
+ *    K.Mohamed - Univ. Toulouse III Paul-Sabatier  2021-2022       *
+ *                                                                  *
+ /******************************************************************/
+
+
 #ifndef couche1_h
 #define couche1_h
 
