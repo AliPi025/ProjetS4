@@ -88,3 +88,38 @@ unsigned int compute_nblock(unsigned int n_octets){
 	
 	return nb_blocs ;
 }
+
+
+void write_block(long pos){
+	
+	/**
+	 *  On commence par positioner le curseur à la position donnée en paramètre
+	 * 	-> On considère que le fichier du virtual_disk_sos est ouvert dans init_disk_sos(char* nom_repertoire) 
+	 */
+	 
+	int position = NULL ;
+	position = fseek(virtual_disk_sos.storage,pos,SEEK_SET);
+	if (position != 0) {
+		fprintf(stderr, "Position impossible");
+		eteindreSys(virtual_disk_sos.storage);
+		exit(EXIT_FAILURE);
+	}
+	
+	/**
+	 *  La variable buffer sera le bloc de mémoire dans lequel sont stockés les octetsà écrire
+	 */
+	 
+	block_t buffer ;
+	if (fwrite(buffer,BLOCK_SIZE,1,virtual_disk_sos.storage )!=1) {
+		fprintf(stderr, "Ecriture du bloc impossible dans le fichier\n");
+		eteindreSys(virtual_disk_sos);
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	/**
+	 *  On doit fermer le fichier du système après la fin de l'écriture du bloc
+	 */
+	 
+	 eteindreSys(virtual_disk_sos.storage);
+}
