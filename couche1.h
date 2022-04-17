@@ -26,3 +26,7 @@ void eteindreSys(FILE* vdisk);
 
 /* Calcule le nombre de blocs nécessaires pour stocker un nombre n_octets */
 unsigned int compute_nblock(unsigned int n_octets);
+
+/* Écrit un bloc block à la position pos sur le disque du système */
+void write_block(long pos);
+
