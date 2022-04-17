@@ -1,9 +1,9 @@
 /********************************************************************
  *    Couche 1 : les blocs                                          *
- * 	  Gestion de l'écriture d'un bloc sur le disque                 *
- * 	  Projet S4                                                     *
+ * 	  Gestion de l'écriture d'un bloc sur le disque             *
+ * 	  Projet S4                                                 *
  *                                                                  *
- * 	  K.Mohamed - Univ. Toulouse III Paul-Sabatier                  *
+ * 	  K.Mohamed - Univ. Toulouse III Paul-Sabatier              *
  *                                                                  *
  /******************************************************************/
  
@@ -88,35 +88,3 @@ unsigned int compute_nblock(unsigned int n_octets){
 	
 	return nb_blocs ;
 }
-
-		
-	 
-	 
-	
-	 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
