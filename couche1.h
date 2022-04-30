@@ -17,7 +17,7 @@
 
 
 /* Initialise la variable 'virtual_disk_sos' à partir du nom du répertoire */
-void init_disk_sos(char* nom_repertoire,virtual_disk_t virtual_disk_sos);
+void init_disk_sos(char* nom_repertoire,virtual_disk_t *virtual_disk_sos);
 
 /* Fonction qui veille a ce que le système soit éteint proprement : Sauvgarde du catalogue */
 void eteindreSys(FILE* vdisk);
