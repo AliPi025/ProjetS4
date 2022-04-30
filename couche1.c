@@ -12,12 +12,12 @@
 
 virtual_disk_t virtual_disk_sos ;
 
-void init_disk_sos(char* nom_repertoire)
+void init_disk_sos(char* nom_repertoire,virtual_disk_t *virtual_disk_sos)
 {
     char* file_emplacement = "./";
     strcat(file_emplacement,nom_repertoire);
     strcat(file_emplacement,"/d0");
-    virtual_disk_sos.storage = fopen(file_emplacement,"rb+");
+    (*virtual_disk_sos).storage = fopen(file_emplacement,"rb+");
     //virtual_disk_sos.super_block = {(uint)0,(uint)0,(uint)0,(uint)0};
     /* A voir
     virtual_disk_sos.users_table
