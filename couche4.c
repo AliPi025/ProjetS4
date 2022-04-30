@@ -13,7 +13,7 @@
 #include "couche1.h"
 
 
-write_file(char* Nomfichier,file_t fichier){
+void write_file(char* Nomfichier,file_t fichier){
 	
 	/*
 	* Récuperer les informations de fichier de la table d'inodes et Super_block
