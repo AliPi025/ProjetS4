@@ -26,10 +26,10 @@ void eteindreSys(FILE* vdisk);
 unsigned int compute_nblock(uchar n_octets);
 
 /* Écrit un bloc block à la position pos sur le disque du système */
-void write_block(long pos,virtual_disk_t virtual_disk_sos);
+void write_block(long pos);
 
 /* Lit un bloc block à la position pos sur le disque du système */
-void read_block(long pos,virtual_disk_t virtual_disk_sos);
+void read_block(long pos);
 
 #endif
 
