@@ -13,7 +13,6 @@
 
 
 #include "sos_defines.h"
-#include "include.h"
 #include "timestamp.h"
 
 
@@ -24,7 +23,7 @@ void init_disk_sos(char* nom_repertoire,virtual_disk_t virtual_disk_sos);
 void eteindreSys(FILE* vdisk);
 
 /* Calcule le nombre de blocs nécessaires pour stocker un nombre n_octets */
-unsigned int compute_nblock(unsigned int n_octets);
+unsigned int compute_nblock(uchar n_octets);
 
 /* Écrit un bloc block à la position pos sur le disque du système */
 void write_block(long pos,virtual_disk_t virtual_disk_sos);

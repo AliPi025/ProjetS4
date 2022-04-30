@@ -15,6 +15,9 @@
 #include "sha256.h"
 #include "sha256_utils.h"
 
+
+#define OS_NAME_REP "DiskDir"
+
 // pour les droits : minuscule = pas le droit, majuscule = droit ok
 #define rw 0 // 00
 #define rW 1 // 01
@@ -26,7 +29,7 @@
 #define MAX_FILE_SIZE (2*1024) // taille max d'un fichier (uchar)
 #define INODE_TABLE_SIZE 10 // taille fixe = nb max de fichiers dans le SE
 #define MAX_MSG 1024 // uchar
-#define TIMESTAMP_SIZE 24+2 // avec \0 et pour que ça tombe juste avec les blocs
+#define TIMESTAMP_SIZE 26 // avec \0 et pour que ça tombe juste avec les blocs
 #define NB_USERS 5
 
 #define BLOCK_SIZE 4 // octets
