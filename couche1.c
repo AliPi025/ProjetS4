@@ -10,8 +10,9 @@
  
 #include "couche1.h"
 
+virtual_disk_t virtual_disk_sos ;
 
-void init_disk_sos(char* nom_repertoire,virtual_disk_t virtual_disk_sos)
+void init_disk_sos(char* nom_repertoire)
 {
     char* file_emplacement = "./";
     strcat(file_emplacement,nom_repertoire);
@@ -48,7 +49,7 @@ unsigned int compute_nblock(uchar n_octets){
 }
 
 
-void write_block(long pos,virtual_disk_t virtual_disk_sos){
+void write_block(long pos){
 	
 	/**
 	 *  On commence par positioner le curseur à la position donnée en paramètre
@@ -77,7 +78,7 @@ void write_block(long pos,virtual_disk_t virtual_disk_sos){
 }
 
 
-void read_block(long pos,virtual_disk_t virtual_disk_sos){
+void read_block(long pos){
 	
 	/**
 	 *  On commence par positioner le curseur à la psotion 'pos'
