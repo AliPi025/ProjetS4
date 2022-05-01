@@ -89,3 +89,49 @@ void write_file(char* Nomfichier,file_t fichier){
 		
 }
 
+uint read_file(char* Nomfichier , file_t fichier){
+	
+	inode_table_t inodeT;
+	super_block_t superB;
+	fpos_t *position ;
+	uint retour = 0 ; // Valeur de retour de la fonction || 1 --> fichier sur le disque || 0 --> fichier introuvable
+	read_inodes_table(virtual_disk_sos.storage , inodeT );
+	read_super_block(virtual_disk_sos.storage , superB ) ;
+	
+	//Taille des inodes des fichiers
+	uint tailleMax = super_Block.number_of_files ;
+	
+	for(int i = 0 ; i<tailleMax ; i++)
+	{
+		/*
+		 * Dans le cas où le 'fichier' est sur le disque | Lecture des blocks | Retour --> 1
+		 */
+		 
+		if(inodeT[i].filename == Nomfichier)
+		{
+			fseek(virtual_disk_sos.storage,0,SEEK_CUR);
+			fgetpos(virtual_disk_sos.storage,position);
+			
+			for(int j=0,j<compute_nblock(fichier.size);j++)
+			{
+				read_block((long)position);
+				position = position + BLOCK_SIZE ;
+			}
+			
+			retour = EXIT_SUCCESS ; 
+		}
+		
+		/*
+		 * Dans le cas où le 'fichier' est introuvable sur le disque | Lecture impossible | Retour --> 0
+		 */
+		 
+		else
+		{
+			//Rien à lire - le fichier n'éxiste pas
+			retour = EXIT_FAILURE ;
+			return retour ;
+		}
+	}
+		
+	return retour ;
+}
