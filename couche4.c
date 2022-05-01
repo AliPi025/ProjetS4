@@ -89,12 +89,12 @@ void write_file(char* Nomfichier,file_t fichier){
 		
 }
 
-uint read_file(char* Nomfichier , file_t fichier){
+int read_file(char* Nomfichier , file_t fichier){
 	
 	inode_table_t inodeT;
 	super_block_t superB;
 	fpos_t *position ;
-	uint retour = 0 ; // Valeur de retour de la fonction || 1 --> fichier sur le disque || 0 --> fichier introuvable
+	int retour = 0 ; // Valeur de retour de la fonction || 1 --> fichier sur le disque || 0 --> fichier introuvable
 	read_inodes_table(virtual_disk_sos.storage , inodeT );
 	read_super_block(virtual_disk_sos.storage , superB ) ;
 	
