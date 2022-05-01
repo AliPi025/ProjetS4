@@ -14,7 +14,7 @@
 void write_file(char* Nomfichier,file_t fichier)
   
 /* Fonction qui lit le fichier 'fichier' si il est présent sur le disque et renvoie 1 | 0 sinon */
-uint read_file(char* Nomfichier , file_t fichier);
+int read_file(char* Nomfichier , file_t fichier);
 
 
 #include "sos_defines.h"
