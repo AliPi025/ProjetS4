@@ -135,3 +135,33 @@ uint read_file(char* Nomfichier , file_t fichier){
 		
 	return retour ;
 }
+	
+
+uint delete_file(char *Nomfichier){
+	
+	inode_table_t inodeT;
+	super_block_t superB;
+	uint retour = 0 ; // Valeur de retour de la fonction || 1 --> Supression faite|| 0 --> fichier introuvable
+	read_inodes_table(virtual_disk_sos.storage , inodeT );
+	read_super_block(virtual_disk_sos.storage , superB ) ;
+
+	//Taille des inodes des fichiers
+	uint tailleMax = super_Block.number_of_files ;
+	
+	for(int i=0 ; i < tailleMax ; i++)
+	{
+		if(inodeT[i].filename == Nomficheir)
+		{
+			delete_inode(virtual_disk_sos.storage,i);
+			retour = EXIT_SUCCESS ;
+		}
+		
+		else
+		{
+			// Supression du inode impossible , FICHIER INTROUVABLE
+			retour = EXIT_FAILURE ;
+		}
+	}
+	
+	return retour;
+}
