@@ -11,10 +11,10 @@
 #define couche4_h
 
 /* Fonction qui écrit le fichier 'fichier' sur le système */
-void write_file(char* Nomfichier,file_t fichier)
+void write_file(char* Nomfichier,file_t fichier);
   
 /* Fonction qui lit le fichier 'fichier' si il est présent sur le disque et renvoie 1 | 0 sinon */
-uint read_file(char* Nomfichier , file_t fichier)
+uint read_file(char* Nomfichier , file_t fichier);
 
 
 #include "sos_defines.h"
