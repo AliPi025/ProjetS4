@@ -1,68 +1,80 @@
 #include "couche2.h"
+#include "couche1.h"
+
+extern virtual_disk_t virtual_disk_sos;
+extern session_t session;
 
 /* Ecrit les infos de la variable super_block dans le super_block du disque */
-void write_super_block(int fd, super_block_t super_block){
-    pwrite(fd, &super_block, sizeof(super_block_t), 0);
+void write_super_block(FILE *storage, super_block_t super_block){
+    block_t *block = &super_block;
+    for(int i = 0; i < SUPER_BLOCK_SIZE; i++){
+        write_block(*block, i*BLOCK_SIZE);
+        block++;
+    }
 }
 
 /* Rentre les infos du super_block dans la variable super_block */
-void read_super_block(int fd, super_block_t *super_block){
-    pread(fd, super_block, sizeof(super_block_t), 0);
+void read_super_block(FILE *storage, super_block_t *super_block){
+    block_t *block = super_block;
+    for(int i = 0; i < SUPER_BLOCK_SIZE; i++){
+        read_block(block, i*BLOCK_SIZE);
+        block++;
+    }
 }
 
 /* Met a jour le champ first_free_byte du super_block */
-void update_first_free_byte(int fd){
-    super_block_t super_block;
-    read_super_block(fd, &super_block);
-    super_block.first_free_byte = sizeof(super_block_t)+sizeof(inode_t)*super_block.number_of_files;
+void update_first_free_byte(){
+    int i = INODES_START+INODE_TABLE_SIZE*INODE_SIZE*BLOCK_SIZE;
+    block_t read_b;
+    read_block(&read_b, i);
+    while(read_b.data[0] != 0 && read_b.data[1] != 0 && read_b.data[2] != 0 && read_b.data[3] != 0){
+        i += BLOCK_SIZE;
+        read_block(&read_b, i);
+    }
+    if(read_b.data[0] == 0);
+    else if(read_b.data[1] == 0) i++;
+    else if(read_b.data[2] == 0) i+=2;
+    else if(read_b.data[3] == 0) i+=3;
+    virtual_disk_sos.super_block.first_free_byte = i;
 }
 
 /* Récupère les infos de la table d'inodes du disque */
-void read_inodes_table(int fd, inode_table_t tables_inodes){
+void read_inodes_table(FILE *storage, inode_table_t table_inodes){
     super_block_t super_block;
-    read_super_block(fd, &super_block);
+    read_super_block(storage, &super_block);
+    fseek(storage, INODES_START, SEEK_SET);
     for(int i = 0; i<super_block.number_of_files; i++){
-        pread(fd, &tables_inodes[i], sizeof(inode_t), sizeof(super_block_t)+sizeof(inode_t)*i);
+        fread(&table_inodes[i], BLOCK_SIZE, INODE_SIZE, storage);
     }
 }
 
 /* Ecrit la table d'inodes sur le disque */
-void write_inodes_table(int fd, inode_table_t table_inodes){
+void write_inodes_table(FILE *storage, inode_table_t table_inodes){
     super_block_t super_block;
-    read_super_block(fd, &super_block);
+    read_super_block(storage, &super_block);
+    fseek(storage, INODES_START, SEEK_SET);
    for(int i = 0; i<super_block.number_of_files; i++){
-      pwrite(fd, &table_inodes[i], sizeof(inode_t), sizeof(super_block_t)+sizeof(inode_t)*i);
+       fwrite(&table_inodes[i], BLOCK_SIZE, INODE_SIZE, storage);
    }
 }
 
 /* Permet de retirer un inode (desc d'un fichier) de la table et de la mettre à jour */
-void delete_inode(int fd, int indice){
-    super_block_t super_block;
-    int i;
-    inode_t inode;
-    read_super_block(fd, &super_block);
-    pread(fd, &inode, sizeof(inode_t), sizeof(super_block_t)+sizeof(inode_t)*indice);
-    super_block.nb_blocks_used -= inode.nblock;
-    for(i = indice; i<super_block.number_of_files-1; i++){
-        pread(fd, &inode, sizeof(inode_t), sizeof(super_block_t)+sizeof(inode_t)*(i+1));
-        pwrite(fd, &inode, sizeof(inode_t), sizeof(super_block_t)+sizeof(inode_t)*i);
+void delete_inode(int indice){
+    virtual_disk_sos.super_block.nb_blocks_used -= virtual_disk_sos.inodes[indice].nblock;
+    for(int i = indice; i+1<virtual_disk_sos.super_block.number_of_files; i++){
+      virtual_disk_sos.inodes[i] = virtual_disk_sos.inodes[i+1];
     }
-    super_block.number_of_files--;
-    write_super_block(fd, super_block);
+    virtual_disk_sos.super_block.number_of_files--;
 }
 
 /* Retourne l'indice du premier inode disponible de la table */
-int get_unused_inode(int fd){
-    super_block_t super_block;
-    read_super_block(fd, &super_block);
-    return (int) super_block.number_of_files;
+int get_unused_inode(){
+    return (int) virtual_disk_sos.super_block.number_of_files;
 }
 
 /* Initialise un inode grâce au fd, nom du fichier, taille, position et user id */
-void init_inode(int fd, char nom_fichier[FILENAME_MAX_SIZE], uint taille, uint pos, session_t session){
+void init_inode(char nom_fichier[FILENAME_MAX_SIZE], uint taille, uint pos){
     inode_t inode;
-    inode_table_t table_inodes;
-    super_block_t super_block;
     char *date;
     strcpy(inode.filename, nom_fichier);
     inode.size = taille;
@@ -70,28 +82,19 @@ void init_inode(int fd, char nom_fichier[FILENAME_MAX_SIZE], uint taille, uint p
     inode.uid = session.userid;
     inode.uright = RW;
     inode.oright = rw;
-    inode.nblock = (inode.size+BLOCK_SIZE-1)/BLOCK_SIZE;///compute_nblock(taille); //<---------------------------------------- à checker
+    inode.nblock = (inode.size+BLOCK_SIZE-1)/BLOCK_SIZE;
     date = timestamp();
     strcpy(inode.ctimestamp, date);
     strcpy(inode.mtimestamp, date);
-    read_super_block(fd, &super_block);
-    read_inodes_table(fd, table_inodes);
-    table_inodes[get_unused_inode(fd)] = inode;
-    super_block.number_of_files++;
-    super_block.nb_blocks_used += inode.nblock;
-    write_super_block(fd, super_block);
-    write_inodes_table(fd, table_inodes);
-    update_first_free_byte(fd);
+    virtual_disk_sos.inodes[get_unused_inode()] = inode;
+    virtual_disk_sos.super_block.number_of_files++;
+    virtual_disk_sos.super_block.nb_blocks_used += inode.nblock;
 }
 
 /* Affiche sur la sortie les infos de chaque inode de la table */
-void cmd_dump_inode(int fd){
-    int i;
-    super_block_t super_block;
-    inode_t inode;
-    read_super_block(fd, &super_block);
-    for(i = 0; i<super_block.number_of_files; i++){
-        pread(fd, &inode, sizeof(inode_t), sizeof(super_block_t)+sizeof(inode_t)*i);
+void cmd_dump_inode(){
+    for(int i = 0; i<virtual_disk_sos.super_block.number_of_files; i++){
+        inode_t inode = virtual_disk_sos.inodes[i];
         printf("Inode %d: \n", i);
         printf("    - Nom: %s\n", inode.filename);
         printf("    - Taille: %d\n", inode.size);
@@ -105,46 +108,7 @@ void cmd_dump_inode(int fd){
     }
 }
 
-/* main de test à compiler avec timestamp.c */
-int main(void){
-    int fd, cr;
-    pid_t pid;
-    switch (pid = fork())
-    {
-    case -1:
-        fprintf(stderr, "echec fork\n");
-        exit(1);
-        break;
-    case 0:
-        execl("cmd_format", "./cmd_format", "DiskDir", "500000", NULL); // <------------------ il faut que le répertoire DiskDir existe déjà et que cmd_format ait été compilé !
-        fprintf(stderr, "echec disk\n");
-        exit(2);
-        break;
-        
-    default:
-        wait(&cr);
-        break;
-    }
-    fd = open("./DiskDir/d0", O_RDWR, S_IRWXU|S_IRWXG|S_IRWXO);
-    // Initialise le super block, la table d'inodes et la session
-    super_block_t sup_b = {0, 1, 0, sizeof(super_block_t)};
-    inode_table_t tab_i;
-    session_t ses = {0};
-    // Ecrit le super block et la table d'inodes
-    write_super_block(fd, sup_b);
-    write_inodes_table(fd, tab_i);
-    // initialise 2 inodes
-    init_inode(fd, "test", 25, 46, ses);
-    init_inode(fd, "test2", 35, 67, ses);
-    // Affiche la table
-    cmd_dump_inode(fd);
-    // Retire la première inode
-    delete_inode(fd, 0);
-    // Affiche la table
-    cmd_dump_inode(fd);
-    close(fd);
-    return 0;
-}
+
 
 // Affichage attendu:
 /*

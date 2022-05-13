@@ -1,23 +1,16 @@
-/********************************************************************
- *    Couche 4 : les blocs                                          *
- *    Gestion de l'écriture d'un bloc sur le disque                 *
- *    Projet S4                                                     *
- *                                                                  *
- *    K.Mohamed - Univ. Toulouse III Paul-Sabatier   2021-2022      *
- *                                                                  *
- ********************************************************************/
-
 #ifndef couche4_h
 #define couche4_h
 
-/* Fonction qui écrit le fichier 'fichier' sur le système */
-void write_file(char* Nomfichier,file_t fichier);
-  
-/* Fonction qui lit le fichier 'fichier' si il est présent sur le disque et renvoie 1 | 0 sinon */
-uint read_file(char* Nomfichier , file_t fichier);
-
-/* Fonction qui supprime le inode du fichier 'Nomfichier' si il est sur le disque et renvoie 1 | 0 sinon */
-uint delete_file(char *Nomfichier);
-
 #include "sos_defines.h"
-#include "timestamp.h"
+
+uint write_file(char filename[], file_t fichier);
+
+uint read_file(char filename[], file_t *fichier);
+
+uint delete_file(char filename[]);
+
+void load_file_from_host(char filename[]);
+
+void store_file_to_host(char filename[]);
+
+#endif

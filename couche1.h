@@ -7,29 +7,20 @@
  *                                                                  *
  ********************************************************************/
 
-
 #ifndef couche1_h
 #define couche1_h
 
-
 #include "sos_defines.h"
-#include "timestamp.h"
 
+void init_disk_sos(char nom_repertoire[]);
 
-/* Initialise la variable 'virtual_disk_sos' à partir du nom du répertoire */
-void init_disk_sos(char* nom_repertoire,virtual_disk_t *virtual_disk_sos);
+void shut_system();
 
-/* Fonction qui veille a ce que le système soit éteint proprement : Sauvgarde du catalogue */
-void eteindreSys(FILE* vdisk);
+uint compute_nblock(uint n_octets);
 
-/* Calcule le nombre de blocs nécessaires pour stocker un nombre n_octets */
-unsigned int compute_nblock(uchar n_octets);
+void write_block(block_t block, long pos);
 
-/* Écrit un bloc block à la position pos sur le disque du système */
-void write_block(long pos);
-
-/* Lit un bloc block à la position pos sur le disque du système */
-void read_block(long pos);
+void read_block(block_t *block, long pos);
 
 #endif
 

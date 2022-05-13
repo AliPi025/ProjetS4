@@ -1,102 +1,66 @@
-/********************************************************************
- *    Couche 1 : les blocs                                          *
- *    Gestion de l'écriture d'un bloc sur le disque                 *
- *    Projet S4                                                     *
- *                                                                  *
- *    K.Mohamed - Univ. Toulouse III Paul-Sabatier   2021-2022      *
- *                                                                  *
- ********************************************************************/
- 
- 
+/*******************************************************************
+*    Couche 1 : les blocs                                          *
+*    Gestion de l'écriture d'un bloc sur le disque                 *
+*    Projet S4                                                     *
+*                                                                  *
+*    K.Mohamed - Univ. Toulouse III Paul-Sabatier   2021-2022      *
+*                                                                  *
+*******************************************************************/
+
 #include "couche1.h"
+#include "couche2.h"
 
-virtual_disk_t virtual_disk_sos ;
+extern virtual_disk_t virtual_disk_sos;
 
-void init_disk_sos(char* nom_repertoire,virtual_disk_t *virtual_disk_sos)
+void init_disk_sos(char nom_repertoire[])
 {
-    char* file_emplacement = "./";
+    char file_emplacement[50] = "./";
     strcat(file_emplacement,nom_repertoire);
     strcat(file_emplacement,"/d0");
-    (*virtual_disk_sos).storage = fopen(file_emplacement,"rb+");
-    //virtual_disk_sos.super_block = {(uint)0,(uint)0,(uint)0,(uint)0};
+    virtual_disk_sos.storage = fopen(file_emplacement,"rb+");
+    //read_super_block(virtual_disk_sos.storage, &(virtual_disk_sos.super_block));
+	//read_inodes_table(virtual_disk_sos.storage, virtual_disk_sos.inodes);
     /* A voir
     virtual_disk_sos.users_table
     */
 }
 
-void eteindreSys(FILE* vdisk)
+void shut_system()
 {
-    fclose(vdisk);
+	write_super_block(virtual_disk_sos.storage, virtual_disk_sos.super_block);
+	write_inodes_table(virtual_disk_sos.storage, virtual_disk_sos.inodes);
+	fclose(virtual_disk_sos.storage);
     //A Completer
 
 }
 
-unsigned int compute_nblock(uchar n_octets){
-	
-	uchar nb_blocs = 0 ;
-	
-	
-	if ( n_octets == 0 ){
-		printf("ERREUR compute_nblock : Nombre d'octets donnes est null \n");
-		return  0 ;
-	}
-	
-	while ( n_octets > 0 ){
-		nb_blocs++ ;
-		n_octets= n_octets - BLOCK_SIZE;
-	}
-	return nb_blocs ;
+uint compute_nblock(uint n_octets){
+	return (n_octets+BLOCK_SIZE-1)/BLOCK_SIZE;
 }
 
 
-void write_block(long pos){
+void write_block(block_t block, long pos){
 	
 	/**
 	 *  On commence par positioner le curseur à la position donnée en paramètre
 	 * 	-> On considère que le fichier du virtual_disk_sos est ouvert dans init_disk_sos(char* nom_repertoire) 
 	 */
-	 
-	int position = 0 ;
-	position = fseek(virtual_disk_sos.storage,pos,SEEK_SET);
-	if (position != 0) {
-		fprintf(stderr, "Position impossible - fonction ecriture\n");
-		eteindreSys(virtual_disk_sos.storage);
-		exit(EXIT_FAILURE);
-	}
-	
-	/**
-	 *  La variable buffer sera le bloc de mémoire dans lequel sont stockés les octetsà écrire
-	 */
-	 
-	block_t buffer ;
-	if (fwrite(buffer.data,BLOCK_SIZE,1,virtual_disk_sos.storage )!=1) {
-		fprintf(stderr, "Ecriture du bloc impossible dans le fichier\n");
-		eteindreSys(virtual_disk_sos.storage);
-		exit(EXIT_FAILURE);
-	}
-	
+	fseek(virtual_disk_sos.storage, pos, SEEK_SET);
+	fwrite(&block,BLOCK_SIZE, 1, virtual_disk_sos.storage);
 }
 
 
-void read_block(long pos){
+void read_block(block_t *block, long pos){
 	
 	/**
 	 *  On commence par positioner le curseur à la psotion 'pos'
 	 *  -> On considère que le fichier du virtual_disk_sos est ouvert dans init_disk_sos(char* nom_repertoire) 
 	 */
+	fseek(virtual_disk_sos.storage,pos,SEEK_SET);
 	
-	int position = 0 ;
-	position = fseek(virtual_disk_sos.storage,pos,SEEK_SET);
-	if (position != 0) {
-		fprintf(stderr, "Position impossible - fonction lecture\n");
-		eteindreSys(virtual_disk_sos.storage);
-		exit(EXIT_FAILURE);
-	}
-	
-	block_t buffer ;
-	if (fread(buffer.data,BLOCK_SIZE,1,virtual_disk_sos.storage )!=1) {
+	if (fread(block,BLOCK_SIZE,1,virtual_disk_sos.storage )!=1) {
 		fprintf(stderr, "Lecture du bloc impossible dans le fichier\n");
-		eteindreSys(virtual_disk_sos.storage);
+		shut_system();
 		exit(EXIT_FAILURE);
 	}
 }

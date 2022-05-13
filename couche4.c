@@ -7,53 +7,32 @@
  *                                                                  *
  ********************************************************************/
  
- 
-#include "couche4.h"
 #include "couche2.h"
 #include "couche1.h"
+#include "couche4.h"
 
+extern virtual_disk_t virtual_disk_sos;
+extern session_t session;
 
-void write_file(char* Nomfichier,file_t fichier){
+uint write_file(char filename[], file_t fichier){
 	
-	/*
-	* Récuperer les informations de fichier de la table d'inodes et Super_block
-	*/
-	
-	inode_table_t inode_Table ; 
-	super_block_t super_Block ;
-	char* date ;
-	fpos_t *position ;
-
-	read_inodes_table(virtual_disk_sos.storage,inode_Table);
-	
-	read_super_block(virtual_disk_sos.storage,super_Block);
-	
-	
-	/* 
-	 * Rechercher le nom de ficheir dans la table des inodes 
-	*/
-	
-	//Taille des inodes des fichiers
-	uint tailleMax = super_Block.number_of_files ;
-	
-	
-	for(int i=0 ; i < tailleMax ;i++)
+    uint position;
+	int found = 0;
+	for(int i = 0; i < virtual_disk_sos.super_block.number_of_files; i++)
 	{
-		if(inode_Table[i].filename == Nomfichier )
-		{
+		if(!strcmp(virtual_disk_sos.inodes[i].filename, filename)){
+			printf("pasok\n");
+			found = 1;
 			/*
 			 * Dans le cas ou le fichier est de taille inférieur ou égale
 			 * --> Mettre à jour la table du inode
 			 */
-			
-			if (inode_Table[i].size >= fichier.size )
+			if (virtual_disk_sos.inodes[i].size >= fichier.size)
 			{
-				inode_Table[i].size = fichier.size ;
-				date = timestamp();
-				inode_Table[i].mtimestamp = date ;
-				inode_Table[i].nblock = compute_nblock(fichier.size);
-				fseek(virtual_disk_sos.storage,inode_Table[i].first_byte,SEEK_SET);
-				fgetpos(virtual_disk_sos.storage,position);
+				virtual_disk_sos.inodes[i].size = fichier.size;
+				strcpy(virtual_disk_sos.inodes[i].mtimestamp, timestamp());
+				virtual_disk_sos.inodes[i].nblock = compute_nblock(fichier.size);
+				position = virtual_disk_sos.inodes[i].first_byte;
 			}
 			
 			/*
@@ -61,107 +40,103 @@ void write_file(char* Nomfichier,file_t fichier){
 			 * --> Suppression du inode et création d'un nouveau à la fin du disque
 			 */
 			 
-			else if (inode_Table[i].size < fichier.size)
+			else if (virtual_disk_sos.inodes[i].size < fichier.size)
 			{
-				delete_inode(virtual_disk_sos.storage,i);
+				delete_inode(i);
 				fseek(virtual_disk_sos.storage,0,SEEK_END);
-				fgetpos(virtual_disk_sos.storage,position);
-				init_inode(virtual_disk_sos.storage , Nomfichier ,fichier.size , (uint)position ) ;
-			}	
+				position = ftell(virtual_disk_sos.storage);
+				init_inode(filename, fichier.size, position);
+			}
 		}
 		
-		else 
-		{
-			fseek(virtual_disk_sos.storage,0,SEEK_END);
-			fgetpos(virtual_disk_sos.storage,position);
-			init_inode(virtual_disk_sos.storage , Nomfichier ,fichier.size , (uint)position ) ;
-		}
-		
-		/*
-		* Ecriture des Blocks 
-		*/
-			 
-		for(int j=0 , j < compute_nblock(fichier.size) , j++ )
-		{
-			write_block((uint)position) ;
-			position = position+BLOCK_SIZE ;
-		}
-		
+	}
+
+	if(!found){
+		printf("ok\n");
+		if(virtual_disk_sos.super_block.number_of_files >= INODE_TABLE_SIZE)
+			return 0;
+		fseek(virtual_disk_sos.storage,0,SEEK_END);
+		position = ftell(virtual_disk_sos.storage);
+		init_inode(filename, fichier.size, position);
+	}
+
+	/*
+	* Ecriture des Blocks 
+	*/
+	block_t *block = &(fichier.data[0]);
+	for(int j = 0; j < compute_nblock(fichier.size); j++)
+	{
+		write_block(*block, position+j*BLOCK_SIZE);
+        block++;
+	}
+	return 1;
 }
 
-uint read_file(char* Nomfichier , file_t fichier){
+uint read_file(char filename[], file_t *fichier){	
 	
-	inode_table_t inodeT;
-	super_block_t superB;
-	fpos_t *position ;
-	uint retour = 0 ; // Valeur de retour de la fonction || 1 --> fichier sur le disque || 0 --> fichier introuvable
-	read_inodes_table(virtual_disk_sos.storage , inodeT );
-	read_super_block(virtual_disk_sos.storage , superB ) ;
-	
-	//Taille des inodes des fichiers
-	uint tailleMax = super_Block.number_of_files ;
-	
-	for(int i = 0 ; i<tailleMax ; i++)
+	for(int i = 0; i<virtual_disk_sos.super_block.number_of_files; i++)
 	{
 		/*
 		 * Dans le cas où le 'fichier' est sur le disque | Lecture des blocks | Retour --> 1
 		 */
 		 
-		if(inodeT[i].filename == Nomfichier)
+		if(!strcmp(virtual_disk_sos.inodes[i].filename, filename))
 		{
-			fseek(virtual_disk_sos.storage,0,SEEK_CUR);
-			fgetpos(virtual_disk_sos.storage,position);
 			
-			for(int j=0,j<compute_nblock(fichier.size);j++)
+			fichier->size = virtual_disk_sos.inodes[i].size;
+			block_t *block;
+			block = &(fichier->data[0]);
+			for(int j=0; j< virtual_disk_sos.inodes[i].nblock ;j++)
 			{
-				read_block((long)position);
-				position = position + BLOCK_SIZE ;
+				read_block(block, virtual_disk_sos.inodes[i].first_byte+j*BLOCK_SIZE);
+				block++;
 			}
-			
-			retour = EXIT_SUCCESS ; 
+			return 1; 
 		}
-		
-		/*
-		 * Dans le cas où le 'fichier' est introuvable sur le disque | Lecture impossible | Retour --> 0
-		 */
-		 
-		else
-		{
-			//Rien à lire - le fichier n'éxiste pas
-			retour = EXIT_FAILURE ;
-			return retour ;
-		}
-	}
-		
-	return retour ;
+	}	
+	return 0;
 }
 	
 
-uint delete_file(char *Nomfichier){
-	
-	inode_table_t inodeT;
-	super_block_t superB;
-	uint retour = 0 ; // Valeur de retour de la fonction || 1 --> Supression faite|| 0 --> fichier introuvable
-	read_inodes_table(virtual_disk_sos.storage , inodeT );
-	read_super_block(virtual_disk_sos.storage , superB ) ;
+uint delete_file(char filename[]){
 
-	//Taille des inodes des fichiers
-	uint tailleMax = super_Block.number_of_files ;
-	
-	for(int i=0 ; i < tailleMax ; i++)
+	for(int i=0 ; i < virtual_disk_sos.super_block.number_of_files ; i++)
 	{
-		if(inodeT[i].filename == Nomficheir)
+		if(!strcmp(virtual_disk_sos.inodes[i].filename, filename))
 		{
-			delete_inode(virtual_disk_sos.storage,i);
-			retour = EXIT_SUCCESS ;
-		}
-		
-		else
-		{
-			// Supression du inode impossible , FICHIER INTROUVABLE
-			retour = EXIT_FAILURE ;
+			delete_inode(i);
+			return 1;
 		}
 	}
+	update_first_free_byte();
+
+	return 0;
+}
+
+void load_file_from_host(char filename[]){
+	FILE *host = fopen(filename, "rb");
+	file_t file;
+	int i = 0;
+	while(!feof(host)){
+		fread(&(file.data[i]), BLOCK_SIZE, 1, host);
+		i+=4;
+	}
+	fseek(host, 0, SEEK_END);
+	file.size = ftell(host);
+	printf("- %d -\n", file.size);
+	write_file(filename, file);
+	fclose(host);
+}
+
+void store_file_to_host(char filename[]){
+	FILE *host = fopen(filename, "wb");
 	
-	return retour;
+	for(int i = 0; i < virtual_disk_sos.super_block.number_of_files; i++){
+		if(!strcmp(virtual_disk_sos.inodes[i].filename, filename)){
+			file_t file;
+			read_file(filename, &file);
+			fwrite(file.data, file.size, 1, host);
+		}
+	}
+	fclose(host);
 }

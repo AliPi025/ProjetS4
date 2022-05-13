@@ -35,7 +35,7 @@
 #define BLOCK_SIZE 4 // octets
 #define SUPER_BLOCK_SIZE 4 // nb blocs
 #define INODES_START SUPER_BLOCK_SIZE*BLOCK_SIZE+1 // en octets
-#define INODE_SIZE FILENAME_MAX_SIZE/BLOCK_SIZE+6+(TIMESTAMP_SIZE*2)/BLOCK_SIZE
+#define INODE_SIZE (FILENAME_MAX_SIZE/BLOCK_SIZE+6+(TIMESTAMP_SIZE*2)/BLOCK_SIZE)
 //= 27 en blocs = 8 blocs de filename+6 uint+timestamps
 
 typedef unsigned int uint; // même taille que int
