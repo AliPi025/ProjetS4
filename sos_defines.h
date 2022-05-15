@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <string.h>
@@ -15,8 +16,6 @@
 #include "sha256.h"
 #include "sha256_utils.h"
 
-
-#define OS_NAME_REP "DiskDir"
 
 // pour les droits : minuscule = pas le droit, majuscule = droit ok
 #define rw 0 // 00

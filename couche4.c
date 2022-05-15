@@ -1,6 +1,6 @@
 /********************************************************************
- *    Couche 4 : les blocs                                          *
- *    Gestion de l'écriture d'un bloc sur le disque                 *
+ *    Couche 4 :                                                    *
+ *    Gestion des fichiers et des droits                            *
  *    Projet S4                                                     *
  *                                                                  *
  *    K.Mohamed - Univ. Toulouse III Paul-Sabatier   2021-2022      *
@@ -14,6 +14,13 @@
 extern virtual_disk_t virtual_disk_sos;
 extern session_t session;
 
+/**
+ * @brief Ecrit le fichier, dont le nom est dans la chaine filename, sur le systeme
+ * 
+ * @param filename 
+ * @param fichier 
+ * @return uint 
+ */
 uint write_file(char filename[], file_t fichier){
 	
     uint position;
@@ -21,7 +28,6 @@ uint write_file(char filename[], file_t fichier){
 	for(int i = 0; i < virtual_disk_sos.super_block.number_of_files; i++)
 	{
 		if(!strcmp(virtual_disk_sos.inodes[i].filename, filename)){
-			printf("pasok\n");
 			found = 1;
 			/*
 			 * Dans le cas ou le fichier est de taille inférieur ou égale
@@ -52,7 +58,6 @@ uint write_file(char filename[], file_t fichier){
 	}
 
 	if(!found){
-		printf("ok\n");
 		if(virtual_disk_sos.super_block.number_of_files >= INODE_TABLE_SIZE)
 			return 0;
 		fseek(virtual_disk_sos.storage,0,SEEK_END);
@@ -72,6 +77,13 @@ uint write_file(char filename[], file_t fichier){
 	return 1;
 }
 
+/**
+ * @brief Recupere un fichier dans le systeme dont le nom correspond a la chaine filename
+ * 
+ * @param filename 
+ * @param fichier 
+ * @return uint 
+ */
 uint read_file(char filename[], file_t *fichier){	
 	
 	for(int i = 0; i<virtual_disk_sos.super_block.number_of_files; i++)
@@ -97,7 +109,12 @@ uint read_file(char filename[], file_t *fichier){
 	return 0;
 }
 	
-
+/**
+ * @brief Efface un fichier du systeme dont le nom correspond a la chaine filename
+ * 
+ * @param filename 
+ * @return uint 
+ */
 uint delete_file(char filename[]){
 
 	for(int i=0 ; i < virtual_disk_sos.super_block.number_of_files ; i++)
@@ -113,6 +130,11 @@ uint delete_file(char filename[]){
 	return 0;
 }
 
+/**
+ * @brief Ecrit un fichier de l'ordinateur sur le systeme virtuel
+ * 
+ * @param filename 
+ */
 void load_file_from_host(char filename[]){
 	FILE *host = fopen(filename, "rb");
 	file_t file;
@@ -123,11 +145,15 @@ void load_file_from_host(char filename[]){
 	}
 	fseek(host, 0, SEEK_END);
 	file.size = ftell(host);
-	printf("- %d -\n", file.size);
 	write_file(filename, file);
 	fclose(host);
 }
 
+/**
+ * @brief Ecrit sur l'ordinateur un fichier du systeme virtuel
+ * 
+ * @param filename 
+ */
 void store_file_to_host(char filename[]){
 	FILE *host = fopen(filename, "wb");
 	

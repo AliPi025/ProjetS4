@@ -2,6 +2,7 @@
 #include "couche1.h"
 #include "couche4.h"
 #include "couche5.h"
+#include "installeur.h"
 #include "sos_defines.h"
 
 
@@ -10,65 +11,60 @@ session_t session;
 
 
 /* main de test à compiler avec timestamp.c */
-int main(void){
-    int cr;
-    pid_t pid;
-    switch (pid = fork())
-    {
-    case -1:
-        fprintf(stderr, "echec fork\n");
-        exit(1);
-        break;
-    case 0:
-        execl("cmd_format", "./cmd_format", OS_NAME_REP, "500", NULL); // <------------------ il faut que le répertoire DiskDir existe déjà et que cmd_format ait été compilé !
-        fprintf(stderr, "echec disk\n");
-        exit(2);
-        break;
-        
-    default:
-        wait(&cr);
-        break;
-    }
+int main(int argc, char *argv[]){
    
-
-    
-    // Initialise le super block, la table d'inodes et la session
-    super_block_t sup_b = {0, 1, 0, INODES_START+INODE_TABLE_SIZE*INODE_SIZE*BLOCK_SIZE};
-    session.userid = 0;
-    init_disk_sos("DiskDir");
-    virtual_disk_sos.super_block = sup_b;
-    for(int i = 0; i < NB_USERS; i++){
-        strcpy(virtual_disk_sos.users_table[i].login, "0");
+    if(argc != 2){
+        printf("%s: usage: %s directory\n", argv[0], argv[0]);
+        return 1;
     }
-    strcpy(virtual_disk_sos.users_table[0].login, "Pierre");
-    virtual_disk_sos.super_block.number_of_users = 1;
-    // Ecrit le super block et la table d'inodes
-    write_super_block(virtual_disk_sos.storage, virtual_disk_sos.super_block);
-    init_inode("test", 25, 46);
-    init_inode("test2", 35, 67);
 
-    write_inodes_table(virtual_disk_sos.storage, virtual_disk_sos.inodes);
-    // initialise 2 inodes
+    DIR *dir = opendir(argv[1]);
+    if(dir)
+        closedir(dir);
+    else{
+        printf("Directory \"%s\" does not exist\n", argv[1]);
+        return 1;
+    }
+
+    char syspath[32];
+    strcpy(syspath, argv[1]);
+    strcat(syspath, "/d0");
     
-    // Affiche la table
-    cmd_dump_inode();
-    // Retire la première inode
-    delete_inode(0);
-    // Affiche la table
-    cmd_dump_inode();
-    load_file_from_host("test.bin");
-    /*file_t file;
-    read_file("test.bin", &file); 
-    printf("%s\n", file.data);*/
-    store_file_to_host("test.bin");
-    cmd_dump_inode();
-    super_block_t sup;
-    read_super_block(virtual_disk_sos.storage, &sup);
-    printf("%d, %d, %d, %d\n", sup.number_of_files, sup.number_of_users, sup.nb_blocks_used, sup.first_free_byte);
-    printf("\n");
+
+    char ans[32];
+    do{ 
+        printf("Want to (re)install system?(Y/N): ");
+        scanf("%s", ans);
+
+    }while(strcmp(ans, "Y") && strcmp(ans, "N"));
+
+    if(!strcmp(ans, "Y")){
+        
+        int cr = install_OS(argv[1]);
+
+        if(cr)
+            return 3;
+
+    }else{
+        FILE *sysfile = fopen(syspath, "rb+");
+        if(sysfile){
+            fseek(sysfile, 0, SEEK_END);
+            if(ftell(sysfile) == 0){
+                printf("System \"%s\" not operational \n", syspath);
+                return 4;
+            }
+                
+            fclose(sysfile);
+        }else{
+            printf("System \"%s\" does not exist\n", syspath);
+            return 2;
+        }
+        
+    }
+
+    init_disk_sos(argv[1]);
+    printf("Launching command interpreter:\n");
     command_interpreter();
-    write_super_block(virtual_disk_sos.storage, virtual_disk_sos.super_block);
-    write_inodes_table(virtual_disk_sos.storage, virtual_disk_sos.inodes);
-    fclose(virtual_disk_sos.storage);
+
     return 0;
 }
