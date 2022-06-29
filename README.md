@@ -28,4 +28,4 @@ Comme il est d'usage en système, la logique de fonctionnement sera divisee en c
 !  Une réinstalation du système d'exploitation vas être demandé au lancement du système, pour un premier lancement ceci ne change rien car de toute façon vous aller créez une nouvelle session .
 
 !  Ensuite vous devez choisir un login ( différent de 0 )
-  
+*texte* 
