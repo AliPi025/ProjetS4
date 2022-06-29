@@ -32,7 +32,11 @@ Comme il est d'usage en système, la logique de fonctionnement sera divisee en c
 ! Saissez un mot de passe pour votre login
 
 + C'est bon vous avez bien créer votre session maintenant vous pouvez vous connecter à votre session en utilisant votre Login et Mot de passe
+
+
 ```
 
-
+Voici la liste des commandes que vous pouvez utilisés sur le Scratch OS , c'est possible de consulter la liste aussi en tappant la commande __help__
+  
+  
 ![ Defined commands ](Help.png)
