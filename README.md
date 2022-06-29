@@ -15,7 +15,7 @@ Comme il est d'usage en système, la logique de fonctionnement sera divisee en c
 
 
   -------------------------------------------------------------------------------------------------------
-                                                " Comment lancer le système d'exploitation "
+                                         " Comment lancer le système d'exploitation "
   -------------------------------------------------------------------------------------------------------
   
    //\\//\\//\\//\\//\\==========>> Faut télécharger la liste des fichiers qui se trouve dans *ProjetS4*/ , Ouvrir une terminal Unix (Ubuntu,VirtualBox...). Puis se 
