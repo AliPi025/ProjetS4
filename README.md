@@ -36,7 +36,7 @@ Comme il est d'usage en système, la logique de fonctionnement sera divisee en c
 
 ```
 
-Voici la liste des commandes que vous pouvez utilisés sur le Scratch OS , c'est possible de consulter la liste aussi en tappant la commande " __help__ "
+Voici la liste des commandes que vous pouvez utilisés sur le Scratch OS , c'est possible de consulter la liste aussi en tappant la commande '__help__'
   
   
 ![ Defined commands ](Help.png)
