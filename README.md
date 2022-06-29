@@ -18,8 +18,10 @@ Comme il est d'usage en système, la logique de fonctionnement sera divisee en c
                                          " Comment lancer le système d'exploitation "
   -------------------------------------------------------------------------------------------------------
   
-   //\\//\\//\\//\\//\\==========>> Faut télécharger la liste des fichiers qui se trouve dans *ProjetS4*/ , Ouvrir une terminal Unix (Ubuntu,VirtualBox...). Puis se 
-   positoner dans le repertoire contenant le projet ensuite veuillez suivre les étapes qui suivent pour bien comprendre le lancement du *système d'exploitation* : 
+   //\\//\\//\\//\\//\\==========>> Faudra d'abord télécharger la liste des fichiers qui se trouve dans *ProjetS4*/ .  
+   Ouvrir une terminal Unix (Ubuntu,VirtualBox...).  
+   Puis se positoner dans le repertoire contenant le projet ensuite veuillez suivre les étapes qui suivent pour bien comprendre le lancement du *système 
+   d'exploitation* : 
    
    1- __make__  
    2- __./virtual_os.exe__ *DiskDir*
