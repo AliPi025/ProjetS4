@@ -1,7 +1,7 @@
-# Projet S4 - L2 Informatique Paul Sabatier # 
+# Projet S4 - L2 Informatique Paul Sabatier
 ```diff
 -             //\\//\\//\\// Un systeme d'exploitation (très) simplifié UNIX like //\\//\\//\\//          -
-
+```
 
 Dans notre projet on a , un from scratch, c'est un systeme d'exploitation avec des fichiers, des utilisateurs, une procédure
 de connexion, un interprète de commande. Le disque dur de la machine sera simule par un fichier qu'on
@@ -15,17 +15,24 @@ Comme il est d'usage en système, la logique de fonctionnement sera divisee en c
 
 
   -------------------------------------------------------------------------------------------------------
-                                " Comment lancer le système d'exploitation "
+                                                " Comment lancer le système d'exploitation "
   -------------------------------------------------------------------------------------------------------
   
-   //\\//\\//\\//\\//\\==========>> Faut télécharger la liste des fichiers qui se trouve dans *ProjetS4*/ , Ouvrir une terminal Unix ( Ubuntu,VirtualBox ...) puis se 
+   //\\//\\//\\//\\//\\==========>> Faut télécharger la liste des fichiers qui se trouve dans *ProjetS4*/ , Ouvrir une terminal Unix (Ubuntu,VirtualBox...). Puis se 
    positoner dans le repertoire contenant le projet ensuite veuillez suivre les étapes qui suivent pour bien comprendre le lancement du *système d'exploitation* : 
    
-   1- __make__
+   1- __make__  
    2- __./virtual_os.exe__ *DiskDir*
    
-   
+``` diff
 !  Une réinstalation du système d'exploitation vas être demandé au lancement du système, pour un premier lancement ceci ne change rien car de toute façon vous aller créez une nouvelle session .
 
 !  Ensuite vous devez choisir un login ( différent de 0 )
-*texte* 
+
+! Saissez un mot de passe pour votre login
+
++ C'est bon vous avez bien créer votre session maintenant vous pouvez vous connecter à votre session en utilisant votre Login et Mot de passe
+```
+
+
+![ Defined commands ]
