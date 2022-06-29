@@ -1,9 +1,7 @@
 # Projet S4 - L2 Informatique Paul Sabatier # 
 ```diff
--             //\\//\\//\\// Un systeme d'exploitation (tres) simplie UNIX like //\\//\\//\\//          -
-```
+-             //\\//\\//\\// Un systeme d'exploitation (très) simplifié UNIX like //\\//\\//\\//          -
 
-                    
 
 Dans notre projet on a , un from scratch, c'est un systeme d'exploitation avec des fichiers, des utilisateurs, une procédure
 de connexion, un interprète de commande. Le disque dur de la machine sera simule par un fichier qu'on
@@ -15,3 +13,10 @@ Le systeme gerera diverses operations sur les fichiers, une table des utilisateu
 de ces derniers sur les fichiers, une procedure de connexion et un interprete de commande.
 Comme il est d'usage en système, la logique de fonctionnement sera divisee en couches .
 
+
+  -------------------------------------------------------------------------------------------------------
+                                " Comment lancer le système d'exploitation "
+  -------------------------------------------------------------------------------------------------------
+  
+   //\\//\\//\\//\\//\\==========>> 1- 
+  
